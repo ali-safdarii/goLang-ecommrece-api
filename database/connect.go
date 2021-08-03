@@ -3,8 +3,10 @@ package database
 import (
 	"alisafdarirepo/models"
 	"fmt"
+	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"log"
 	"os"
 )
 
@@ -34,8 +36,20 @@ func Connect() {
 
 /*Connect to postgres sql*/
 func Connect() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	username := os.Getenv("UserName")
+	password := os.Getenv("Password")
+	dbName := os.Getenv("DBName")
+	port := os.Getenv("Port")
+
+	dsn := "user=" + username + "\tpassword=" + password + "\tdbname=" + dbName + "\tport=" + port + "\tsslmode=disable TimeZone=Asia/Shanghai"
+	//"user=postgres password=52281374 dbname=postgres port=5432 sslmode=disable TimeZone=Asia/Tehran"
 	db, err := gorm.Open(postgres.New(postgres.Config{
-		DSN:                  "user=postgres password=52281374 dbname=postgres port=5432 sslmode=disable TimeZone=Asia/Shanghai",
+		DSN:                  dsn,
 		PreferSimpleProtocol: true, // disables implicit prepared statement usage
 	}), &gorm.Config{})
 
@@ -44,12 +58,14 @@ func Connect() {
 		os.Exit(1)
 	}
 
-	err = db.AutoMigrate(&models.User{})
+	fmt.Println("Connecting To Database Successfully")
+
+	err = db.AutoMigrate(&models.User{}, &models.Role{}, models.Permission{},
+		&models.Product{}, &models.Order{})
 
 	if err != nil {
 		panic("Auto Migration Failed")
 	}
-
+	fmt.Println("AutoMigration Successfully")
 	DB = db
-
 }
