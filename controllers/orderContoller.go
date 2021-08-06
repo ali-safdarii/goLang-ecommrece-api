@@ -11,8 +11,10 @@ func FindOrderByUserId(c *fiber.Ctx) error {
 
 	var orders []models.Order
 
-	result := database.DB.Preload("Product").Where("user_id", 2).
+	result := database.DB.Preload("Product").Where("user_id", 1).
 		Preload("User").Find(&orders)
+
+	//result :=database.DB.Preload(clause.Associations).Find(&orders)
 	err := result.Error
 
 	if err != nil {
